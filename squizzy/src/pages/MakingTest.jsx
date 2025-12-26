@@ -36,6 +36,35 @@ const MakingTest = () => {
     setCurrQuestionIdx(questions.length);
   };
 
+  // функция для удаления вопроса
+  const delQuestion = (questionId, e) => {
+
+    if (questions.length <= 1) {
+      alert('В тесте должен быть хотя бы один вопрос');
+      return;
+    }
+
+    const questionIdx = questions.findIndex(q => q.id === questionId);
+    const updQuestions = questions.filter(q => q.id !== questionId);
+
+    // перенумеровываем ID вопросов
+    const renumQuestions = updQuestions.map((q, index) => ({
+      ...q,
+      id: index + 1
+    }));
+
+    setQuestions(renumQuestions);
+
+    // обновляем текущий индекс
+    if (currQuestionIdx === questionIdx) {
+      // если удаляем текущий вопрос, переходим на предыдущий или первый
+      setCurrQuestionIdx(Math.max(0, questionIdx - 1));
+    } else if (currQuestionIdx > questionIdx) {
+      // если удаляем вопрос перед текущим, уменьшаем индекс текущего вопроса
+      setCurrQuestionIdx(currQuestionIdx - 1);
+    }
+  };
+
   // функция для добавления нового варианта ответа к текущему вопросу
   const addAnswer = () => {
     const currQuestion = questions[currQuestionIdx];
@@ -104,6 +133,52 @@ const MakingTest = () => {
     setQuestions(updQuestions);
   };
 
+  // функция для обновления текста вопроса
+  const updateQuestionText = (text) => {
+    const updQuestions = questions.map((question, index) => {
+      if (index === currQuestionIdx) {
+        return {
+          ...question,
+          text
+        };
+      }
+      return question;
+    });
+
+    setQuestions(updQuestions);
+  };
+
+  // функция для обновления текста ответа
+  const updateAnswerText = (answerId, text) => {
+    const updQuestions = questions.map((question, index) => {
+      if (index === currQuestionIdx) {
+        return {
+          ...question,
+          answers: question.answers.map(answer =>
+            answer.id === answerId ? { ...answer, text } : answer
+          )
+        };
+      }
+      return question;
+    });
+
+    setQuestions(updQuestions);
+  };
+
+  // функция для обновления баллов за вопрос
+  const updateQuestionPoints = (points) => {
+    const updQuestions = questions.map((question, index) => {
+      if (index === currQuestionIdx) {
+        return {
+          ...question,
+          points: Math.max(1, parseInt(points) || 1)
+        };
+      }
+      return question;
+    });
+
+    setQuestions(updQuestions);
+  };
 
   // получаем текущий вопрос
   const currQuestion = questions[currQuestionIdx];
@@ -222,8 +297,8 @@ const MakingTest = () => {
                         <button
                           onClick={() => setCorrectAnswer(answer.id)}
                           className={`mt-3 px-4 py-2 rounded-lg transition-all duration-200 whitespace-nowrap ${answer.isCorrect
-                              ? 'bg-green-600 text-white hover:bg-green-700'
-                              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                            ? 'bg-green-600 text-white hover:bg-green-700'
+                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                             }`}
                         >
                           {answer.isCorrect ? '✓ Верный' : 'Отметить верным'}
@@ -235,8 +310,8 @@ const MakingTest = () => {
                             onChange={(e) => updateAnswerText(answer.id, e.target.value)}
                             placeholder={`Текст варианта ${answer.id}...`}
                             className={`w-full p-4 text-lg border-2 rounded-xl focus:outline-none transition-all duration-200 ${answer.isCorrect
-                                ? 'border-green-500 bg-green-50'
-                                : 'border-violet-200 focus:border-violet-500'
+                              ? 'border-green-500 bg-green-50'
+                              : 'border-violet-200 focus:border-violet-500'
                               }`}
                           />
                         </div>
@@ -281,31 +356,44 @@ const MakingTest = () => {
                   <div
                     key={question.id}
                     onClick={() => setCurrQuestionIdx(index)}
-                    className={`p-4 rounded-xl border-2 transition-all duration-200 cursor-pointer ${currQuestionIdx === index
-                        ? 'bg-violet-100 border-violet-500'
-                        : 'bg-violet-50 border-violet-200 hover:bg-violet-100'
+                    className={`p-4 rounded-xl border-2 transition-all duration-200 cursor-pointer relative group ${currQuestionIdx === index
+                      ? 'bg-violet-100 border-violet-500'
+                      : 'bg-violet-50 border-violet-200 hover:bg-violet-100'
                       }`}
                   >
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${currQuestionIdx === index
-                            ? 'bg-violet-600 text-white'
-                            : 'bg-violet-200 text-violet-800'
-                          }`}>
-                          {index + 1}
+                    {/* кнопка удаления вопроса (появляется при наведении) */}
+                    {questions.length > 1 && (
+                      <button
+                        onClick={(e) => delQuestion(question.id, e)}
+                        className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-red-600 z-10 shadow-md"
+                        title="Удалить вопрос"
+                      >
+                        ×
+                      </button>
+                    )}
+                    
+                    <div className="flex items-start gap-3">
+                      <div className={`flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center ${currQuestionIdx === index
+                        ? 'bg-violet-600 text-white'
+                        : 'bg-violet-200 text-violet-800'
+                        }`}>
+                        {index + 1}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex justify-between items-start gap-2">
+                          <span className="font-medium text-violet-800 break-words line-clamp-2">
+                            {question.text || `Вопрос ${index + 1}`}
+                          </span>
+                          <div className="flex-shrink-0 flex items-center gap-2">
+                            <span className="text-sm text-violet-600 whitespace-nowrap">
+                              {question.points} балл{question.points === 1 ? '' : (question.points > 1 && question.points < 5) ? 'а' : 'ов'}
+                            </span>
+                          </div>
                         </div>
-                        <span className="font-medium text-violet-800 truncate">
-                          {question.text || `Вопрос ${index + 1}`}
-                        </span>
+                        <div className="mt-2 text-sm text-gray-600">
+                          {question.answers.filter(a => a.isCorrect).length} верный ответ
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm text-violet-600">
-                          {question.points} балл{question.points === 1 ? '' : (question.points > 1 && question.points < 5) ? 'а' : 'ов'}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="mt-2 text-sm text-gray-600">
-                      {question.answers.filter(a => a.isCorrect).length} верный ответ
                     </div>
                   </div>
                 ))}
@@ -341,7 +429,8 @@ const MakingTest = () => {
                   <li>• Отметьте верный ответ кнопкой "Отметить верным"</li>
                   <li>• В тесте должно быть минимум 2 варианта ответа на вопрос</li>
                   <li>• Только один вариант ответа верный (это пока, возможны изменения)</li>
-                  <li>• Над статистикой теста есть кнопка "Добавить вопрос"</li>
+                  <li>• Над содержнанием теста есть кнопка "Добавить вопрос"</li>
+                  <li>• Чтобы удалить вопрос, наведите на него и нажмите на красный крестик</li>
                 </ul>
               </div>
             </div>
