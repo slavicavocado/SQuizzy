@@ -19,8 +19,28 @@ const MakingTest = () => {
   const [testImg, setTestImg] = useState(null);
   const [imgPrev, setImgPrev] = useState(null);
 
+  // состояние для основной информации теста
+  const [testTitle, setTestTitle] = useState('');
+  const [testDescription, setTestDescription] = useState('');
+
   // индекс текущего редактируемого вопроса
   const [currQuestionIdx, setCurrQuestionIdx] = useState(0);
+
+  // обработчик изменения названия теста
+  const TitleChange = (e) => {
+    const value = e.target.value;
+    if (value.length <= 115) {
+      setTestTitle(value);
+    }
+  };
+
+  // обработчик изменения описания теста
+  const DescriptionChange = (e) => {
+    const value = e.target.value;
+    if (value.length <= 200) {
+      setTestDescription(value);
+    }
+  };
 
   // обработчик загрузки изображения для теста
   const ImgUpload = (e) => {
@@ -318,9 +338,15 @@ const MakingTest = () => {
                     </label>
                     <input
                       type="text"
+                      value={testTitle}
+                      onChange={TitleChange}
                       placeholder="Введите название теста..."
                       className="w-full p-4 text-lg border-2 border-violet-200 rounded-xl focus:border-violet-500 focus:outline-none transition-all duration-200"
+                      maxLength={115}
                     />
+                    <div className={`text-right text-sm mt-1 ${testTitle.length >= 100 ? 'text-red-500' : 'text-gray-500'}`}>
+                      {testTitle.length}/115 символов
+                    </div>
                   </div>
 
                   <div>
@@ -342,9 +368,15 @@ const MakingTest = () => {
                     Описание теста
                   </label>
                   <textarea
+                    value={testDescription}
+                    onChange={DescriptionChange}
                     placeholder="Опишите ваш тест..."
                     className="w-full p-4 text-lg border-2 border-violet-200 rounded-xl focus:border-violet-500 focus:outline-none transition-all duration-200 h-32"
+                    maxLength={200}
                   />
+                  <div className={`text-right text-sm mt-1 ${testDescription.length >= 100 ? 'text-red-500' : 'text-gray-500'}`}>
+                    {testDescription.length}/200 символов
+                  </div>
                 </div>
               </div>
             </div>
@@ -520,8 +552,8 @@ const MakingTest = () => {
                         />
                       </div>
                       <div className="text-center">
-                        <h3 className="font-bold text-violet-900 mb-1">Название теста</h3>
-                        <p className="text-gray-600 text-sm">Краткое описание</p>
+                        <h3 className="font-bold text-violet-900 mb-1 line-clamp-1">{testTitle || "Название теста"}</h3>
+                        <p className="text-gray-600 text-sm line-clamp-2">{testDescription || "Краткое описание"}</p>
                       </div>
                     </div>
                   </div>

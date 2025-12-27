@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from 'react-router-dom';
 import './App.css';
 import MakingTest from './pages/MakingTest';
+import UserPage from './pages/UserPage';
 
 function HomePage() {
   const navigate = useNavigate();
@@ -10,10 +11,14 @@ function HomePage() {
     navigate('/making-test');
   };
 
+   const goToUserPage = () => {
+    navigate('/user');
+  };
+
   return (
     <div className='bg-violet-200 min-h-screen flex flex-col items-center p-4 font-mono relative'>
       
-      {/* кнопки Регистрации и Входа в правом верхнем углу */}
+      {/* кнопки Регистрации, Входа и Профиля в правом верхнем углу */}
       <div className="absolute top-4 right-4 flex gap-3">
         <button className="px-6 py-2 text-violet-700 font-medium border-2 border-violet-400 rounded-xl hover:bg-violet-50 hover:border-violet-500 transition-all duration-200">
           Регистрация
@@ -21,6 +26,15 @@ function HomePage() {
         <button className="px-6 py-2 bg-violet-600 text-white font-medium border-2 border-violet-700 rounded-xl hover:bg-violet-700 transition-all duration-200 shadow-md">
           Вход
         </button>
+
+        {/* кнопка перехода на страницу пользователя */}
+          <button 
+            onClick={goToUserPage}
+          className="px-6 py-2 text-violet-700 font-medium border-2 border-violet-400 rounded-xl hover:bg-violet-50 hover:border-violet-500 transition-all duration-200 flex items-center gap-2"
+          >
+          Профиль
+          </button>
+        
       </div>
 
       {/* заголовок и описание */}
@@ -87,6 +101,7 @@ function App() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/making-test" element={<MakingTest />} />
+        <Route path="/user" element={<UserPage />} />
       </Routes>
     </Router>
   );
